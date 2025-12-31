@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowDownUp, ChevronDown, Settings, Info, Zap, TrendingUp, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -343,7 +343,7 @@ const SwapInterface = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-card border border-border rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-card relative overflow-hidden mt-3 sm:mt-0"
+          className="bg-card border border-border rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-card relative overflow-visible mt-3 sm:mt-0"
         >
           {/* Settings Row */}
           <div className="flex items-center justify-between mb-2.5 sm:mb-3 md:mb-4">
@@ -437,7 +437,7 @@ const SwapInterface = () => {
           </div>
 
           {/* From Token */}
-          <div className="relative">
+          <div className="relative overflow-visible">
             <TokenInput
               label="You send"
               token={fromToken}
@@ -461,7 +461,7 @@ const SwapInterface = () => {
           </div>
 
           {/* To Token */}
-          <div className="relative">
+          <div className="relative overflow-visible">
             <TokenInput
               label="You receive"
               token={toToken}
@@ -669,65 +669,100 @@ const TokenInput = ({
   tokens,
   onSelectToken,
   readOnly = false,
-}: TokenInputProps) => (
-  <div className="bg-secondary/50 rounded-lg sm:rounded-xl p-2.5 sm:p-3 relative">
-    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-      <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">{label}</span>
-      <span className="text-[10px] sm:text-xs text-muted-foreground">Balance: {token.balance}</span>
+}: TokenInputProps) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const onTokenClickRef = useRef(onTokenClick);
+
+  // Keep the callback ref up to date
+  useEffect(() => {
+    onTokenClickRef.current = onTokenClick;
+  }, [onTokenClick]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showDropdown &&
+        containerRef.current &&
+        dropdownRef.current &&
+        !containerRef.current.contains(event.target as Node) &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        onTokenClickRef.current(); // Close the dropdown
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showDropdown]);
+
+  return (
+    <div ref={containerRef} className="bg-secondary/50 rounded-lg sm:rounded-xl p-2.5 sm:p-3 relative">
+      <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+        <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">{label}</span>
+        <span className="text-[10px] sm:text-xs text-muted-foreground">Balance: {token.balance}</span>
+      </div>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <input
+          type="text"
+          value={amount}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+              onAmountChange(value);
+            }
+          }}
+          readOnly={readOnly}
+          className={`flex-1 text-lg sm:text-xl md:text-2xl font-semibold bg-transparent text-foreground focus:outline-none ${readOnly ? 'cursor-default' : ''}`}
+          placeholder="0.0"
+        />
+        <button
+          onClick={onTokenClick}
+          className="flex items-center gap-1.5 sm:gap-2 bg-card border border-border rounded-lg px-2 sm:px-2.5 py-1.5 sm:py-2 hover:border-primary/50 transition-colors shrink-0"
+        >
+          <div className="w-4 h-4 sm:w-5 sm:h-5">
+            {token.logo}
+          </div>
+          <span className="font-semibold text-foreground text-xs sm:text-sm">{token.symbol}</span>
+          <ChevronDown className="w-3 h-3 text-muted-foreground hidden sm:block" />
+        </button>
+      </div>
+      <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">≈$0</div>
+      
+      {/* Token Dropdown */}
+      {showDropdown && (
+        <motion.div
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl p-2 shadow-premium-lg z-[100] max-h-64 overflow-y-auto"
+        >
+          {tokens.map((t) => (
+            <button
+              key={t.symbol}
+              onClick={() => onSelectToken(t)}
+              className="w-full flex items-center gap-3 p-3 hover:bg-secondary rounded-xl transition-colors"
+            >
+              <div className="w-8 h-8">
+                {t.logo}
+              </div>
+              <div className="text-left flex-1">
+                <div className="font-semibold text-foreground">{t.symbol}</div>
+                <div className="text-xs text-muted-foreground">{t.name}</div>
+              </div>
+              <span className="text-sm text-muted-foreground font-medium">{t.balance}</span>
+            </button>
+          ))}
+        </motion.div>
+      )}
     </div>
-    <div className="flex items-center gap-2 sm:gap-3">
-      <input
-        type="text"
-        value={amount}
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value === '' || /^\d*\.?\d*$/.test(value)) {
-            onAmountChange(value);
-          }
-        }}
-        readOnly={readOnly}
-        className={`flex-1 text-lg sm:text-xl md:text-2xl font-semibold bg-transparent text-foreground focus:outline-none ${readOnly ? 'cursor-default' : ''}`}
-        placeholder="0.0"
-      />
-      <button
-        onClick={onTokenClick}
-        className="flex items-center gap-1.5 sm:gap-2 bg-card border border-border rounded-lg px-2 sm:px-2.5 py-1.5 sm:py-2 hover:border-primary/50 transition-colors shrink-0"
-      >
-        <div className="w-4 h-4 sm:w-5 sm:h-5">
-          {token.logo}
-        </div>
-        <span className="font-semibold text-foreground text-xs sm:text-sm">{token.symbol}</span>
-        <ChevronDown className="w-3 h-3 text-muted-foreground hidden sm:block" />
-      </button>
-    </div>
-    <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">≈$0</div>
-    
-    {/* Token Dropdown */}
-    {showDropdown && (
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl p-2 shadow-premium-lg z-20 max-h-64 overflow-y-auto"
-      >
-        {tokens.map((t) => (
-          <button
-            key={t.symbol}
-            onClick={() => onSelectToken(t)}
-            className="w-full flex items-center gap-3 p-3 hover:bg-secondary rounded-xl transition-colors"
-          >
-            <div className="w-8 h-8">
-              {t.logo}
-            </div>
-            <div className="text-left flex-1">
-              <div className="font-semibold text-foreground">{t.symbol}</div>
-              <div className="text-xs text-muted-foreground">{t.name}</div>
-            </div>
-            <span className="text-sm text-muted-foreground font-medium">{t.balance}</span>
-          </button>
-        ))}
-      </motion.div>
-    )}
-  </div>
-);
+  );
+};
 
 export default SwapInterface;

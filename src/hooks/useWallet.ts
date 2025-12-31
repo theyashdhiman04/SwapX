@@ -10,6 +10,7 @@ export const useWallet = () => {
   });
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autoConnected, setAutoConnected] = useState(false);
 
   const updateState = useCallback(async () => {
     try {
@@ -35,6 +36,23 @@ export const useWallet = () => {
     const checkWallet = async () => {
       // Wait a bit for MetaMask to be ready
       await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Check if we're returning from a MetaMask mobile redirect and auto-connect
+      try {
+        const autoConnectedState = await walletService.checkAndAutoConnect();
+        if (autoConnectedState) {
+          setState(autoConnectedState);
+          setIsConnecting(false);
+          setError(null);
+          setAutoConnected(true);
+          // Clear the flag after a short delay
+          setTimeout(() => setAutoConnected(false), 100);
+          return;
+        }
+      } catch (err: any) {
+        console.error('Auto-connect check failed:', err);
+      }
+      
       await updateState();
     };
     
@@ -102,6 +120,7 @@ export const useWallet = () => {
     ...state,
     isConnecting,
     error,
+    autoConnected,
     connect,
     disconnect,
     switchNetwork,

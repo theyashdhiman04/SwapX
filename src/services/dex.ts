@@ -36,19 +36,39 @@ const FEE_TIERS = [500, 3000, 10000];
 class DEXService {
   private provider: ethers.BrowserProvider | null = null;
 
+  private getEthereumProvider(): any {
+    // Check for standard ethereum provider
+    if (typeof window !== 'undefined' && window.ethereum) {
+      return window.ethereum;
+    }
+
+    // Check for mobile MetaMask (sometimes injected differently)
+    if (typeof window !== 'undefined' && (window as any).web3?.currentProvider) {
+      return (window as any).web3.currentProvider;
+    }
+
+    // Check for ethereum in different locations (mobile browsers)
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      return (window as any).ethereum;
+    }
+
+    return null;
+  }
+
   async initialize() {
     // First try to get provider from wallet service
     this.provider = walletService.getProvider();
     
     // If no provider, check if wallet is connected and initialize
     if (!this.provider) {
-      if (typeof window !== 'undefined' && window.ethereum) {
+      const ethereum = this.getEthereumProvider();
+      if (ethereum) {
         try {
           // Check if wallet is connected
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          const accounts = await ethereum.request({ method: 'eth_accounts' });
           if (accounts.length > 0) {
             // Wallet is connected, create provider
-            this.provider = new ethers.BrowserProvider(window.ethereum);
+            this.provider = new ethers.BrowserProvider(ethereum);
           } else {
             throw new Error('Wallet not connected. Please connect your MetaMask wallet.');
           }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, Wallet, Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,23 @@ import { useToast } from "@/hooks/use-toast";
 
 const SwapNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isConnected, address, connect, disconnect, isConnecting, error } = useWallet();
+  const { isConnected, address, connect, disconnect, isConnecting, error, autoConnected } = useWallet();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+
+  // Show toast when auto-connect succeeds
+  useEffect(() => {
+    if (autoConnected && isConnected) {
+      toast({
+        title: "Wallet Connected",
+        description: "Successfully connected to MetaMask",
+      });
+    }
+  }, [autoConnected, isConnected, toast]);
+
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
 
   const handleConnect = async () => {
     if (isConnected) {
@@ -23,9 +37,16 @@ const SwapNavbar = () => {
           description: "Successfully connected to MetaMask",
         });
       } catch (error: any) {
+        let errorMessage = error.message || "Failed to connect wallet";
+        
+        // Provide mobile-specific instructions
+        if (isMobile && errorMessage.includes("MetaMask")) {
+          errorMessage = "Please open this site in MetaMask Mobile browser. Open MetaMask app → Browser → Enter swapx.yashdhiman.in";
+        }
+        
         toast({
           title: "Connection Failed",
-          description: error.message || "Failed to connect wallet",
+          description: errorMessage,
           variant: "destructive",
         });
       }

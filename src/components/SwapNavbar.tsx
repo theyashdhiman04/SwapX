@@ -174,6 +174,13 @@ const SwapNavbar = () => {
                 LinkedIn
               </a>
             </div>
+            
+            {/* Subtle Credit */}
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border text-center">
+              <p className="text-[10px] text-muted-foreground">
+                Built by <a href="https://github.com/theyashdhiman04" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">Yash Dhiman</a>
+              </p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

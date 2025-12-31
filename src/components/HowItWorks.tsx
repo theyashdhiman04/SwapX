@@ -1,83 +1,192 @@
-import { motion } from "framer-motion";
-import { Wallet, Search, Zap, CheckCircle } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Wallet, Search, Zap, CheckCircle, ArrowRight, Lock, BarChart3, Rocket } from "lucide-react";
+import { useRef } from "react";
 
 const steps = [
   {
     icon: Wallet,
     title: "Connect Wallet",
-    description: "Link your Web3 wallet using Ethers.js or Web3.js",
+    description: "Securely link your Web3 wallet using MetaMask or any compatible wallet provider",
+    number: "01",
+    tips: "Supports MetaMask, WalletConnect, and more"
   },
   {
     icon: Search,
     title: "Query Rates",
-    description: "Fetch real-time rates from multiple DEX protocols",
+    description: "Instantly fetch real-time rates from multiple DEX protocols simultaneously",
+    number: "02",
+    tips: "Compare rates across all integrated DEXs"
   },
   {
     icon: Zap,
     title: "Select Route",
-    description: "Compare gas costs and choose optimal path",
+    description: "Compare gas costs, slippage, and choose the optimal swap path",
+    number: "03",
+    tips: "Automatic route optimization included"
   },
   {
     icon: CheckCircle,
     title: "Execute Swap",
-    description: "Submit with automatic fallback protection",
+    description: "Submit your transaction with automatic fallback protection and route optimization",
+    number: "04",
+    tips: "Secure and fast transaction execution"
   },
 ];
 
+const features = [
+  { icon: Lock, text: "Non-custodial swaps" },
+  { icon: BarChart3, text: "Real-time price comparison" },
+  { icon: Rocket, text: "Optimized gas usage" },
+];
+
+const StepCard = ({ step, index }: { step: typeof steps[0], index: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 100 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 100 });
+  
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["6deg", "-6deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-6deg", "6deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!ref.current) return;
+    
+    const rect = ref.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / rect.width - 0.5;
+    const yPct = mouseY / rect.height - 0.5;
+    
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.15, duration: 0.6 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+      }}
+      className="group relative perspective-1000"
+    >
+      {/* Step Number Badge - Desktop */}
+      <div className="hidden lg:flex absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-xl bg-green-500 text-white items-center justify-center text-base font-bold border-4 border-background shadow-lg z-20">
+        {step.number}
+      </div>
+
+      {/* Step Number Badge - Mobile */}
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20 lg:hidden">
+        <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold border-4 border-background shadow-lg">
+          {index + 1}
+        </div>
+      </div>
+
+      {/* Minimal Card */}
+      <div className="relative h-full bg-card/80 backdrop-blur-xl border border-border rounded-2xl p-8 transition-all duration-300 hover:border-green-500/30 hover:shadow-lg">
+        {/* Subtle hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+        
+        <div className="relative z-10">
+          {/* Icon */}
+          <div className="w-16 h-16 rounded-xl bg-muted/50 border border-border flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 group-hover:border-green-500/30 mx-auto lg:mx-0">
+            <step.icon className="w-8 h-8 text-green-500" strokeWidth={2} />
+          </div>
+
+          {/* Title */}
+          <h3 className="text-xl font-bold text-foreground mb-3 font-display group-hover:text-green-500 transition-colors duration-300">
+            {step.title}
+          </h3>
+
+          {/* Description */}
+          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+            {step.description}
+          </p>
+
+          {/* Tips */}
+          <div className="pt-4 border-t border-border/50">
+            <p className="text-xs text-muted-foreground/70 italic">
+              {step.tips}
+            </p>
+          </div>
+
+          {/* Arrow - Mobile */}
+          {index < steps.length - 1 && (
+            <div className="lg:hidden flex justify-center mt-6">
+              <ArrowRight className="w-5 h-5 text-green-500 rotate-90" />
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 const HowItWorks = () => {
   return (
-    <section className="py-24 px-4 border-y border-border/50">
-      <div className="max-w-5xl mx-auto">
+    <section className="py-20 sm:py-24 md:py-28 px-4 sm:px-6 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          <span className="inline-block bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-            How It Works
+          <span className="inline-block text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-4 px-4 py-2 rounded-full bg-muted/50 border border-border">
+            Process
           </span>
-          <h2 className="font-display text-display-md font-bold text-foreground mb-4">
-            Four simple steps
+          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-foreground mb-4">
+            How It Works
           </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto text-lg">
-            Swap tokens at the best available rates across multiple DEXs.
+          <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg mb-8">
+            Swap tokens at the best available rates across multiple DEXs in just four simple steps.
           </p>
+          
+          {/* Features */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
+            {features.map((feature, idx) => (
+              <motion.div
+                key={feature.text}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="flex items-center gap-2 text-sm text-muted-foreground"
+              >
+                <feature.icon className="w-4 h-4 text-green-500" />
+                <span>{feature.text}</span>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="relative h-full"
-            >
-              {/* Connector Line */}
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-10 left-[60%] w-full h-px bg-gradient-to-r from-border to-transparent" />
-              )}
-              
-              <div className="bg-card border border-border rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center relative z-10 card-hover h-full flex flex-col">
-                {/* Step Number */}
-                <div className="absolute -top-2.5 -right-2.5 sm:-top-3 sm:-right-3 w-6 h-6 sm:w-7 sm:h-7 bg-primary text-primary-foreground rounded-lg flex items-center justify-center text-xs sm:text-sm font-bold">
-                  {index + 1}
-                </div>
-                
-                {/* Icon */}
-                <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-4 sm:mb-5 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-                  <step.icon className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
-                </div>
-                
-                {/* Content */}
-                <h3 className="font-display font-semibold text-sm sm:text-base text-foreground mb-1.5 sm:mb-2">{step.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed flex-1">{step.description}</p>
-              </div>
-            </motion.div>
-          ))}
+        <div className="relative">
+          {/* Connection Line - Desktop */}
+          <div className="hidden lg:block absolute top-24 left-0 right-0 h-0.5">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-border to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500/30 via-green-500 to-green-500/30" style={{ width: '75%', left: '12.5%' }} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {steps.map((step, index) => (
+              <StepCard key={step.title} step={step} index={index} />
+            ))}
+          </div>
         </div>
       </div>
     </section>

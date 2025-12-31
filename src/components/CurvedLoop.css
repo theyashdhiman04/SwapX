@@ -1,0 +1,62 @@
+.curved-loop-jacket {
+  min-height: 120px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100vw;
+  max-width: none;
+  overflow: visible;
+  position: relative;
+  padding: 0.5rem 0 1.5rem 0;
+  margin-top: -3rem;
+  margin-left: 0;
+  margin-right: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.curved-loop-jacket svg {
+  position: relative;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+.curved-loop-svg {
+  user-select: none;
+  width: 100vw !important;
+  min-width: 100vw;
+  height: auto;
+  overflow: visible;
+  display: block;
+  font-size: clamp(2rem, 4vw, 4rem);
+  fill: currentColor;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1;
+  font-family: 'Inter', 'Sora', system-ui, sans-serif;
+  position: relative;
+  z-index: 30;
+}
+
+.curved-loop-svg text {
+  fill: hsl(var(--muted-foreground) / 0.3);
+  transition: fill 0.3s ease;
+}
+
+.dark .curved-loop-svg text {
+  fill: hsl(var(--muted-foreground) / 0.25);
+}
+
+.curved-loop-jacket:hover .curved-loop-svg text {
+  fill: hsl(var(--muted-foreground) / 0.5);
+}
+
+.dark .curved-loop-jacket:hover .curved-loop-svg text {
+  fill: hsl(var(--muted-foreground) / 0.4);
+}
+

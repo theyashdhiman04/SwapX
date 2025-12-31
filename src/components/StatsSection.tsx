@@ -93,38 +93,38 @@ const StatCard = ({ stat, index }: { stat: typeof stats[0], index: number }) => 
       className="group relative perspective-1000"
     >
       {/* Minimal Card */}
-      <div className="relative h-full bg-card/80 backdrop-blur-xl border border-border rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:border-green-500/30 hover:shadow-lg">
+      <div className="relative h-full bg-card/80 backdrop-blur-xl border border-border rounded-2xl p-6 sm:p-8 overflow-hidden transition-all duration-300 hover:border-green-500/30 hover:shadow-lg">
         {/* Subtle hover effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
         
         {/* Content */}
-        <div className="relative z-10">
+        <div className="relative z-10 flex flex-col h-full">
           {/* Icon */}
-          <div className="mb-4">
-            <div className={`w-12 h-12 rounded-xl bg-muted/50 border border-border flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:border-green-500/30`}>
-              <stat.icon className={`w-6 h-6 ${stat.iconColor}`} strokeWidth={2} />
+          <div className="mb-6">
+            <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-muted/50 border border-border flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:border-green-500/30`}>
+              <stat.icon className={`w-7 h-7 sm:w-8 sm:h-8 ${stat.iconColor}`} strokeWidth={2} />
             </div>
           </div>
           
           {/* Value */}
-          <div className="mb-2">
-            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 font-display">
+          <div className="mb-4 flex-1">
+            <h3 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 font-display">
               {stat.value}
             </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1">
+            <p className="text-sm sm:text-base text-muted-foreground font-medium mb-2">
               {stat.label}
             </p>
-            <p className="text-xs text-muted-foreground/70">
+            <p className="text-xs sm:text-sm text-muted-foreground/70">
               {stat.description}
             </p>
           </div>
           
           {/* Change */}
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border/50">
+          <div className="flex items-center gap-2 mt-auto pt-4 border-t border-border/50">
             {stat.change !== "Active" && stat.change !== "Fast" ? (
               <>
-                <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                <span className="text-xs font-medium text-green-500">
+                <TrendingUp className="w-4 h-4 text-green-500" />
+                <span className="text-sm font-medium text-green-500">
                   {stat.change}
                 </span>
                 <span className="text-xs text-muted-foreground">this month</span>
@@ -132,7 +132,7 @@ const StatCard = ({ stat, index }: { stat: typeof stats[0], index: number }) => 
             ) : (
               <>
                 <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-xs font-medium text-green-500">
+                <span className="text-sm font-medium text-green-500">
                   {stat.change}
                 </span>
               </>
@@ -146,19 +146,19 @@ const StatCard = ({ stat, index }: { stat: typeof stats[0], index: number }) => 
 
 const StatsSection = () => {
   return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
+    <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-12 sm:mb-16"
         >
           <span className="inline-block text-xs font-medium text-muted-foreground tracking-wider uppercase mb-4">
             Platform Statistics
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3 font-display">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 font-display">
             Trusted by Thousands
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
@@ -166,7 +166,7 @@ const StatsSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
           {stats.map((stat, index) => (
             <StatCard key={stat.label} stat={stat} index={index} />
           ))}

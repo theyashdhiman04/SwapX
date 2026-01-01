@@ -590,7 +590,7 @@ const SwapInterface = () => {
                 <div className="mt-2 p-2 bg-secondary/30 rounded-lg">
                   <div className="text-[10px] sm:text-xs text-muted-foreground mb-1 sm:mb-1.5">Other routes:</div>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {routes.filter(r => !r.isBest).map((route) => (
+                    {routes.filter(r => r.name !== selectedRoute?.name).map((route) => (
                       <button
                         key={route.name}
                         onClick={() => {

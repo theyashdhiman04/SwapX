@@ -59,6 +59,8 @@ Visit `http://localhost:8080` to see SwapX in action!
 ![SwapX Screenshot 2](./src/screenshot/image%20copy.png)
 ![SwapX Screenshot 3](./src/screenshot/image%20copy%202.png)
 ![SwapX Screenshot 4](./src/screenshot/image%20copy%203.png)
+![SwapX Screenshot 5](./src/screenshot/image%20copy%204.png)
+![SwapX Screenshot 6](./src/screenshot/image%20copy%205.png)
 
 ## 🔒 Security
 

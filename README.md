@@ -53,11 +53,9 @@ Visit `http://localhost:8080` to see SwapX in action!
 **Mainnet**: ETH, WETH, USDC, USDT, DAI, WBTC  
 **Testnets**: ETH, WETH, USDC
 
-## 📖 Documentation
+## 📸 Screenshots
 
-- [Full Documentation](./README.md#documentation)
-- [Security Considerations](./README.md#security-considerations)
-- [Troubleshooting Guide](./README.md#troubleshooting)
+See screenshots at: `@SwapX/src/screenshot/`
 
 ## 🔒 Security
 

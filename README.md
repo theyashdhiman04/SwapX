@@ -87,4 +87,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-Made with ❤️ by [Yash Dhiman](https://github.com/theyashdhiman04)

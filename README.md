@@ -55,7 +55,10 @@ Visit `http://localhost:8080` to see SwapX in action!
 
 ## 📸 Screenshots
 
-See screenshots at: `@SwapX/src/screenshot/`
+![SwapX Screenshot 1](./src/screenshot/image.png)
+![SwapX Screenshot 2](./src/screenshot/image%20copy.png)
+![SwapX Screenshot 3](./src/screenshot/image%20copy%202.png)
+![SwapX Screenshot 4](./src/screenshot/image%20copy%203.png)
 
 ## 🔒 Security
 

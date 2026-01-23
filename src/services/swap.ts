@@ -27,8 +27,32 @@ class SwapService {
     'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)',
   ];
 
-  private UNISWAP_V2_ROUTER = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
-  private SUSHI_ROUTER = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F';
+  // Router addresses by network
+  private UNISWAP_V2_ROUTER_ADDRESSES: Record<number, string> = {
+    1: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Mainnet
+    5: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Goerli
+    11155111: '0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3', // Sepolia
+  };
+
+  private SUSHI_ROUTER_ADDRESSES: Record<number, string> = {
+    1: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F', // Mainnet
+  };
+
+  private getUniswapV2Router(chainId: number): string {
+    const address = this.UNISWAP_V2_ROUTER_ADDRESSES[chainId];
+    if (!address) {
+      throw new Error(`Uniswap V2 router not configured for chain ${chainId}`);
+    }
+    return address;
+  }
+
+  private getSushiRouter(chainId: number): string {
+    const address = this.SUSHI_ROUTER_ADDRESSES[chainId];
+    if (!address) {
+      throw new Error(`SushiSwap router not configured for chain ${chainId}`);
+    }
+    return address;
+  }
 
   async executeSwap(params: SwapParams): Promise<SwapResult> {
     const signer = walletService.getSigner();
@@ -93,8 +117,9 @@ class SwapService {
       throw new Error('WETH not found for this network');
     }
 
+    const routerAddress = this.getUniswapV2Router(chainId);
     const router = new ethers.Contract(
-      this.UNISWAP_V2_ROUTER,
+      routerAddress,
       this.UNISWAP_V2_ROUTER_ABI,
       signer
     );
@@ -133,7 +158,7 @@ class SwapService {
     } else if (tokenOutSymbol === 'ETH') {
       // Swap tokens for ETH (uses WETH internally)
       // First approve the router to spend tokens
-      await this.approveToken(tokenInInfo.address, this.UNISWAP_V2_ROUTER, amountInWei, signer);
+      await this.approveToken(tokenInInfo.address, routerAddress, amountInWei, signer);
       
       tx = await router.swapExactTokensForETH(
         amountInWei,
@@ -145,7 +170,7 @@ class SwapService {
     } else {
       // Swap tokens for tokens
       // First approve the router to spend tokens
-      await this.approveToken(tokenInInfo.address, this.UNISWAP_V2_ROUTER, amountInWei, signer);
+      await this.approveToken(tokenInInfo.address, routerAddress, amountInWei, signer);
       
       tx = await router.swapExactTokensForTokens(
         amountInWei,
@@ -209,8 +234,9 @@ class SwapService {
       throw new Error('WETH not found for this network');
     }
 
+    const routerAddress = this.getSushiRouter(chainId);
     const router = new ethers.Contract(
-      this.SUSHI_ROUTER,
+      routerAddress,
       this.UNISWAP_V2_ROUTER_ABI, // Same ABI as Uniswap V2
       signer
     );
@@ -249,7 +275,7 @@ class SwapService {
     } else if (tokenOutSymbol === 'ETH') {
       // Swap tokens for ETH (uses WETH internally)
       // First approve the router to spend tokens
-      await this.approveToken(tokenInInfo.address, this.SUSHI_ROUTER, amountInWei, signer);
+      await this.approveToken(tokenInInfo.address, routerAddress, amountInWei, signer);
       
       tx = await router.swapExactTokensForETH(
         amountInWei,
@@ -261,7 +287,7 @@ class SwapService {
     } else {
       // Swap tokens for tokens
       // First approve the router to spend tokens
-      await this.approveToken(tokenInInfo.address, this.SUSHI_ROUTER, amountInWei, signer);
+      await this.approveToken(tokenInInfo.address, routerAddress, amountInWei, signer);
       
       tx = await router.swapExactTokensForTokens(
         amountInWei,

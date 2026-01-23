@@ -23,12 +23,47 @@ export interface SwapRoute {
   isBest: boolean;
 }
 
-// Uniswap V3 Pool Factory Address
+// Uniswap V3 Pool Factory Address (same on mainnet and common testnets)
 const UNISWAP_V3_FACTORY = '0x1F98431c8aD98523631AE4a59f267346ea31F984';
-// Uniswap V2 Router Address
-const UNISWAP_V2_ROUTER = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
-// SushiSwap Router Address
-const SUSHI_ROUTER = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F';
+
+// Uniswap V2 Router / Factory addresses by network
+// Mainnet + Goerli share the canonical addresses; Sepolia uses separate deployments
+const UNISWAP_V2_ROUTER_ADDRESSES: Record<number, string> = {
+  1: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Ethereum mainnet
+  5: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Goerli
+  11155111: '0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3', // Sepolia
+};
+
+const UNISWAP_V2_FACTORY_ADDRESSES: Record<number, string> = {
+  1: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // Mainnet
+  5: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // Goerli
+  11155111: '0xF62c03E08ada871A0bEb309762E260a7a6a880E6', // Sepolia
+};
+
+// SushiSwap Router Address by network (only mainnet explicitly supported)
+const SUSHI_ROUTER_ADDRESSES: Record<number, string> = {
+  1: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F',
+};
+
+const getUniswapV2RouterAddress = (chainId: number): string => {
+  const address = UNISWAP_V2_ROUTER_ADDRESSES[chainId];
+  if (!address) {
+    throw new Error(`Uniswap V2 router not configured for chain ${chainId}`);
+  }
+  return address;
+};
+
+const getUniswapV2FactoryAddress = (chainId: number): string => {
+  const address = UNISWAP_V2_FACTORY_ADDRESSES[chainId];
+  if (!address) {
+    throw new Error(`Uniswap V2 factory not configured for chain ${chainId}`);
+  }
+  return address;
+};
+
+const getSushiRouterAddress = (chainId: number): string | null => {
+  return SUSHI_ROUTER_ADDRESSES[chainId] ?? null;
+};
 
 // Common fee tiers for Uniswap V3
 const FEE_TIERS = [500, 3000, 10000];
@@ -410,7 +445,7 @@ class DEXService {
     if (!this.provider) return null;
 
     try {
-      const factoryAddress = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
+      const factoryAddress = getUniswapV2FactoryAddress(chainId);
       const factoryABI = [
         'function getPair(address tokenA, address tokenB) external view returns (address pair)',
       ];
@@ -494,11 +529,13 @@ class DEXService {
     if (!this.provider) return null;
 
     try {
-      // SushiSwap Factory Address (same on mainnet, but may differ on other chains)
-      // Mainnet: 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
-      const factoryAddress = chainId === 1 
-        ? '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac'
-        : '0xc35DADB65012eC5796536bD9864eD8773aBc74C4'; // SushiSwap V2 Factory (used on many chains)
+      // SushiSwap Factory Address (only explicitly supporting mainnet here)
+      if (chainId !== 1) {
+        // SushiSwap is not configured on this network; skip gracefully
+        return null;
+      }
+
+      const factoryAddress = '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac';
       
       const factoryABI = [
         'function getPair(address tokenA, address tokenB) external view returns (address pair)',
@@ -585,7 +622,7 @@ class DEXService {
     }
 
     try {
-      const routerAddress = UNISWAP_V2_ROUTER;
+      const routerAddress = getUniswapV2RouterAddress(chainId);
       const routerABI = [
         'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)',
       ];
